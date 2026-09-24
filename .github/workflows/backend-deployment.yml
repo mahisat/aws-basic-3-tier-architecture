@@ -1,0 +1,46 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Backend EC2 (Private Subnet)
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+          HOST: ${{ secrets.BACKEND_EC2_PRIVATE_IP }}
+          USER: ec2-user
+        run: |
+          mkdir -p ~/.ssh
+          echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+          
+          # Copy backend folder to EC2
+          scp -r backend/ $USER@$HOST:/home/ec2-user/app/
+          
+          # SSH and restart the application
+          ssh $USER@$HOST << 'EOF'
+            cd /home/ec2-user/app/backend
+            npm install
+            # Kill existing process if running
+            pkill -f "node" || true
+            # Start Node.js app (you can use PM2 or similar)
+            nohup npm start > app.log 2>&1 &
+            echo "Backend deployed successfully"
+          EOF
+
+      - name: Deployment Status
+        if: always()
+        run: echo "Backend deployment completed with status: ${{ job.status }}"
