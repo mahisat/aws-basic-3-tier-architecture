@@ -1,36 +1,53 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "Starting frontend setup..."
 
-# Update system
-yum update -y
-yum install -y git nodejs npm curl
+dnf update -y
+dnf install -y git nginx
 
-# Create app directory
+curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+dnf install -y nodejs
+
 mkdir -p /home/ec2-user/app
 cd /home/ec2-user/app
 
-# Clone repository (or pull if exists)
 if [ ! -d ".git" ]; then
-  git clone ${github_repo} .
+  git clone "${github_repo}" .
 else
   git pull origin main
 fi
 
-# Install dependencies
 cd frontend
-npm install
-
-# Build React app
+npm ci
 npm run build
 
-# Install PM2 globally for process management
-npm install -g pm2
+mkdir -p /var/www/frontend
+cp -r dist/* /var/www/frontend/
 
-# Start the app with PM2
-pm2 start "npm start" --name "react-app"
-pm2 startup
-pm2 save
+cat > /etc/nginx/conf.d/frontend.conf << EOF
+server {
+    listen 80;
+    server_name _;
+    root /var/www/frontend;
+    index index.html;
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://${backend_host}:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+
+systemctl enable nginx
+systemctl restart nginx
 
 echo "Frontend setup completed!"

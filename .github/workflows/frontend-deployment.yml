@@ -6,44 +6,49 @@ on:
       - main
     paths:
       - 'frontend/**'
-      - '.github/workflows/frontend-deploy.yml'
+      - '.github/workflows/frontend-deployment.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Deploy to Frontend EC2 (Public Subnet)
+      - name: Deploy to Frontend EC2 (public subnet)
         env:
           PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
           HOST: ${{ secrets.FRONTEND_EC2_PUBLIC_IP }}
           USER: ec2-user
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
-          echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+          printf '%s\n' "$PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
-          
-          # Copy frontend folder to EC2
-          scp -r frontend/ $USER@$HOST:/home/ec2-user/app/
-          
-          # SSH and restart the application
-          ssh $USER@$HOST << 'EOF'
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+
+          scp -r frontend/ "$USER@$HOST:/home/ec2-user/app/"
+
+          ssh "$USER@$HOST" << 'EOF'
+            set -euo pipefail
             cd /home/ec2-user/app/frontend
-            npm install
+            npm ci
             npm run build
-            # Kill existing process if running
-            pkill -f "npm start" || true
-            pkill -f "node" || true
-            # Start React app (you can use Nginx or serve directly)
-            nohup npm start > app.log 2>&1 &
-            echo "Frontend deployed successfully"
+            sudo mkdir -p /var/www/frontend
+            sudo rm -rf /var/www/frontend/*
+            sudo cp -r dist/* /var/www/frontend/
+            sudo systemctl reload nginx
           EOF
 
-      - name: Verify Frontend is Running
+      - name: Verify frontend HTTP
         run: |
           sleep 5
-          curl -f http://${{ secrets.FRONTEND_EC2_PUBLIC_IP }}:3000/ || echo "Frontend health check - may need a few more seconds to start"
+          curl -fsS "http://${{ secrets.FRONTEND_EC2_PUBLIC_IP }}/" -o /dev/null

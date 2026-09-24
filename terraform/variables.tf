@@ -1,53 +1,58 @@
-
-variable "project"{
-    type        = string
-    description = "Project Name"
-    default     = "my-project"
+variable "project" {
+  type        = string
+  description = "Project name used for resource naming"
+  default     = "my-project"
 }
 
 variable "region" {
   type        = string
-  description = "AWS Regios"
+  description = "AWS region"
   default     = "us-east-1"
 }
 
 variable "vpc_cidr" {
   type        = string
-  description = "VPC CIDR Block"
+  description = "VPC CIDR block"
   default     = "10.0.0.0/16"
 }
 
 variable "public_subnet_cidr" {
-    type        = string
-    description = "Public Subnet CIDR Block"
-    default     = "10.0.1.0/24"
+  type        = string
+  description = "Public subnet CIDR block"
+  default     = "10.0.1.0/24"
 }
 
 variable "private_subnet_cidr" {
-    type        = string
-    description = "Private Subnet CIDR Block"
-    default     = "10.0.2.0/24"
+  type        = string
+  description = "Primary private subnet CIDR block"
+  default     = "10.0.2.0/24"
+}
+
+variable "private_subnet_cidr_2" {
+  type        = string
+  description = "Secondary private subnet CIDR block (required for RDS subnet group)"
+  default     = "10.0.3.0/24"
 }
 
 variable "db_name" {
-    type        = string
-    description = "Database Name"
-    default     = "my-database"
+  type        = string
+  description = "MySQL database name"
+  default     = "todo_app"
 }
+
 variable "db_username" {
-    type        = string
-    description = "Database Username"
-    default     = "admin"
+  type        = string
+  description = "MySQL master username"
+  default     = "dbadmin"
 }
 
 variable "db_password" {
-    type        = string
-    description = "Database Password"
-    default     = "admin123"
+  type        = string
+  description = "MySQL master password"
+  sensitive   = true
 }
 
 variable "github_repo_url" {
-    type        = string
-    description = "GitHub Repository URL"
-    default     = "https://github.com/your-username/your-repo.git"
+  type        = string
+  description = "Public GitHub repository URL cloned on EC2 instances"
 }

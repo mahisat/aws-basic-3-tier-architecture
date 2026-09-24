@@ -1,0 +1,22 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DeployBackendViaSsm",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ssm:SendCommand",
+        "ssm:GetCommandInvocation",
+        "ssm:ListCommandInvocations"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SsmCommandDocument",
+      "Effect": "Allow",
+      "Action": "ssm:DescribeDocument",
+      "Resource": "arn:aws:ssm:*:*:document/AWS-RunShellScript"
+    }
+  ]
+}
