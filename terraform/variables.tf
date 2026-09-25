@@ -56,3 +56,15 @@ variable "github_repo_url" {
   type        = string
   description = "Public GitHub repository URL cloned on EC2 instances"
 }
+
+variable "frontend_vite_api_base_url" {
+  type        = string
+  description = "VITE_API_BASE_URL for production frontend build. Use /api with nginx (recommended for public users)."
+  default     = "/api"
+}
+
+variable "frontend_use_backend_private_api_url" {
+  type        = bool
+  description = "If true, bake http://<backend private IP>:5000/api into the frontend build (browser must reach that IP; not for public internet)."
+  default     = false
+}

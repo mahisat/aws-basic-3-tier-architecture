@@ -23,7 +23,7 @@ Attach `iam-terraform-least-privilege.json` (adjust project prefix) plus:
 | AWS service | Why |
 |-------------|-----|
 | **EC2 (VPC)** | VPC, subnets, IGW, route tables, NAT gateway, EIP, security groups, instances, key pair |
-| **EC2 Describe** | AMI/AZ lookups (`data.aws_ami`, `data.aws_availability_zones`) |
+| **EC2 Describe** | AMI/AZ lookups; `DescribeKeyPairs`; `DescribeAddresses` / `DescribeAddressesAttribute` (EIP); `DescribeInstanceAttribute` (instance refresh) |
 | **RDS** | DB instance, DB subnet group, tags |
 | **IAM** | Create/delete instance profile + role; attach `AmazonSSMManagedInstanceCore` |
 
@@ -39,4 +39,5 @@ Optional hardening: replace `"Resource": "*"` on `ssm:SendCommand` with specific
 
 1. Copy `terraform/<project>-deployer-key.pem` → GitHub secret `EC2_PRIVATE_KEY`.
 2. `terraform output -raw frontend_public_ip` → `FRONTEND_EC2_PUBLIC_IP`.
-3. Configure OIDC roles and secrets per root README (if present) or workflow comments.
+3. `terraform output -raw backend_private_ip` → `BACKEND_EC2_PRIVATE_IP` (nginx `/api` proxy).
+4. Configure OIDC roles and secrets per root README (if present) or workflow comments.

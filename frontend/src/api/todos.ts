@@ -5,8 +5,9 @@ import type {
   Todo,
   UpdateTodoInput,
 } from '../types/todo'
+import { getTodosApiBase } from '../config/api'
 
-const API_BASE = '/api/todos'
+const API_BASE = getTodosApiBase()
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, {

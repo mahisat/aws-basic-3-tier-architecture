@@ -27,12 +27,14 @@ resource "aws_instance" "backend_server" {
   ]
 
   user_data = base64encode(templatefile("${path.module}/backend-setup.sh", {
-    github_repo = var.github_repo_url
-    db_endpoint = aws_db_instance.database.address
-    db_name     = var.db_name
-    db_user     = var.db_username
-    db_password = var.db_password
+    github_repo  = var.github_repo_url
+    db_endpoint  = aws_db_instance.database.address
+    db_name      = var.db_name
+    db_user      = var.db_username
+    db_password  = var.db_password
+    systemd_unit = file("${path.module}/todo-backend.service")
   }))
+  user_data_replace_on_change = true
 
   tags = {
     Name = "${var.project}-backend-server"
@@ -55,9 +57,14 @@ resource "aws_instance" "web_server" {
   ]
 
   user_data = base64encode(templatefile("${path.module}/frontend-setup.sh", {
-    github_repo  = var.github_repo_url
-    backend_host = aws_instance.backend_server.private_ip
+    github_repo       = var.github_repo_url
+    backend_host      = aws_instance.backend_server.private_ip
+    vite_api_base_url = var.frontend_use_backend_private_api_url ? "http://${aws_instance.backend_server.private_ip}:5000/api" : var.frontend_vite_api_base_url
+    nginx_conf = templatefile("${path.module}/nginx-frontend.conf.tpl", {
+      backend_host = aws_instance.backend_server.private_ip
+    })
   }))
+  user_data_replace_on_change = true
 
   tags = {
     Name = "${var.project}-web-server"

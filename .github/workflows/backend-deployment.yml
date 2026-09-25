@@ -54,11 +54,12 @@ jobs:
               "set -euo pipefail",
               "cd /home/ec2-user/app",
               "git pull origin main",
-              "cd backend",
-              "npm ci",
-              "npm run build",
-              "pm2 restart node-app || pm2 start dist/server.js --name node-app",
-              "pm2 save"
+              "chown -R ec2-user:ec2-user /home/ec2-user/app",
+              "sudo -u ec2-user bash -lc \"cd /home/ec2-user/app/backend && npm ci && npm run build\"",
+              "systemctl restart todo-backend",
+              "sleep 2",
+              "systemctl is-active todo-backend",
+              "curl -sf http://127.0.0.1:5000/health"
             ]' \
             --comment "GitHub Actions backend deploy" \
             --query 'Command.CommandId' \
