@@ -28,6 +28,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify AWS_DEPLOY_ROLE_ARN secret (masked)
+        env:
+          ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ROLE_ARN}" ]; then
+            echo "::error::AWS_DEPLOY_ROLE_ARN is missing or empty"
+            exit 1
+          fi
+          echo "AWS_DEPLOY_ROLE_ARN: present (length=${#ROLE_ARN})"
+          if [[ "${ROLE_ARN}" =~ ^arn:aws:iam::[0-9]{12}:role/.+ ]]; then
+            echo "Format: looks like a valid IAM role ARN"
+            echo "Role name (suffix): .../${ROLE_ARN##*/}"
+          else
+            echo "::warning::Does not match arn:aws:iam::ACCOUNT:role/NAME — check the secret value"
+          fi
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
