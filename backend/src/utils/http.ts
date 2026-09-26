@@ -10,6 +10,7 @@ export const sendSuccess = <T>(
     success: true,
     ...(message ? { message } : {}),
     data,
+    date: new Date().toISOString(),
   });
 };
 
