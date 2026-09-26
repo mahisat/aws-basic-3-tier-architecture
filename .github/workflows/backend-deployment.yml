@@ -54,8 +54,7 @@ jobs:
             --instance-ids "$INSTANCE_ID" \
             --parameters commands='[
               "set -euo pipefail",
-              "cd /home/ec2-user/app",
-              "git pull origin main",
+              "sudo -u ec2-user bash -lc \"cd /home/ec2-user/app && git pull origin main\"",
               "chown -R ec2-user:ec2-user /home/ec2-user/app",
               "sudo -u ec2-user bash -lc \"cd /home/ec2-user/app/backend && npm ci && npm run build\"",
               "systemctl restart todo-backend",
