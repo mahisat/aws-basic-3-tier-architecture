@@ -19,14 +19,20 @@ Private outbound traffic → NAT Gateway → Internet Gateway
 | [`frontend/`](frontend/) | React (Vite) SPA |
 | [`backend/`](backend/) | Express + TypeScript API |
 | [`.github/workflows/`](.github/workflows/) | Frontend (SSH) and backend (SSM + OIDC) deploy |
-| [`docs/`](docs/) | **Zero-to-Hero blog series** (Medium-ready Markdown) |
 
-## Learning path (recommended order)
+## Documentation (Zero to Hero blog)
 
-1. Read **[docs/series-00-zero-to-hero-index.md](docs/series-00-zero-to-hero-index.md)**
-2. **[Part 1 — Terraform + AWS](docs/01-terraform-aws-zero-to-hero.md)** — infrastructure, every Terraform file, debugging
-3. **[Part 2 — GitHub Actions + OIDC](docs/02-github-actions-oidc-zero-to-hero.md)** — CI/CD, trust policies, new GitHub `sub` claim format, architecture review
-4. **[Linux commands reference](docs/linux-commands-reference.md)** — `ssh`, `systemctl`, `curl`, `terraform`, etc.
+Tutorials for this repo live on **GitHub Pages** — read them **in order**:
+
+| Step | Link |
+|------|------|
+| Series home | [Zero to Hero Terraform AWS](https://mahisat.github.io/terraform-aws-zero-to-hero/) |
+| Part 1 — Terraform + AWS | [Build a three-tier architecture](https://mahisat.github.io/terraform-aws-zero-to-hero/posts/part-1-terraform-aws-three-tier/) |
+| Part 2 — GitHub Actions + OIDC | [Automated deployment](https://mahisat.github.io/terraform-aws-zero-to-hero/posts/part-2-github-actions-oidc/) |
+| Appendix — Terraform & project files | [Deep dive](https://mahisat.github.io/terraform-aws-zero-to-hero/reference/appendix-terraform-and-project-files/) |
+| Linux commands reference | [ssh, systemctl, curl, terraform, …](https://mahisat.github.io/terraform-aws-zero-to-hero/reference/linux-commands-reference/) |
+
+Repo-specific IAM notes remain in [`terraform/IAM.md`](terraform/IAM.md).
 
 ## Prerequisites
 
@@ -64,7 +70,7 @@ cd frontend && npm install && npm run dev
 
 ## GitHub Actions (after Part 1)
 
-Configure secrets: `AWS_DEPLOY_ROLE_ARN`, `EC2_PRIVATE_KEY`, `FRONTEND_EC2_PUBLIC_IP`, `BACKEND_EC2_PRIVATE_IP`. See Part 2 and [`terraform/IAM.md`](terraform/IAM.md).
+Configure secrets: `AWS_DEPLOY_ROLE_ARN`, `EC2_PRIVATE_KEY`, `FRONTEND_EC2_PUBLIC_IP`, `BACKEND_EC2_PRIVATE_IP`. See [Part 2 on the blog](https://mahisat.github.io/terraform-aws-zero-to-hero/posts/part-2-github-actions-oidc/) and [`terraform/IAM.md`](terraform/IAM.md).
 
 ## Bootstrap / debug logs (EC2)
 
@@ -82,5 +88,4 @@ Manual repair: [`terraform/install-backend-service.sh`](terraform/install-backen
 **NAT Gateway** and **RDS** bill while resources exist. Destroy the stack when not learning.
 
 ## License
-
-MIT (application). Adjust for your fork.
+This project is licensed under the Apache License, Version 2.0. See the LICENSE file for the full text.
